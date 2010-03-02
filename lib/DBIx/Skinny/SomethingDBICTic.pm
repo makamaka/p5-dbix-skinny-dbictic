@@ -19,7 +19,6 @@ DBIx::Skinny::SomethingDBICTic - dbic-like interface
 =head1 SYNOPSIS
 
     package Your::Model::Schema;
-    use utf8;
     use DBIx::Skinny::Schema;
     use DBIx::Skinny::SomethingDBICTic::Schema;
     
@@ -133,8 +132,8 @@ C<join>に指定する名前、joinするテーブル名、ハッシュを引数
 
   $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
-DBIx::Classっぽい値を渡せる。$attrに使えるキーはL</RESULTSET FEATURE>を参照。
-C<DBIx::Skiny::Iterator>を返す。
+L<DBIx::Class::Resultset>っぽい値を渡せる。$attrに使えるキーはL</RESULTSET FEATURE>を参照。
+C<DBIx::Skiny::SQL>を継承したオブジェクトを返す。
 
 =head2 pager
 
@@ -243,10 +242,14 @@ page指定したときのcount用ステートメンスとカラムを返すサ�
 
 C<$where>とC<having>の値に対してL<SQL::Abstract>が適用される。
 
+=head1 SEE ALSO
+
+L<DBIx::Skinny>,
+L<DBIx::Class::Resultset>
+
 =head1 AUTHOR
 
 Makamaka Hannyaharamitu, E<lt>makamaka[at]cpan.orgE<gt>
-
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -17,7 +17,6 @@ NAME
 
 SYNOPSIS
         package Your::Model::Schema;
-        use utf8;
         use DBIx::Skinny::Schema;
         use DBIx::Skinny::SomethingDBICTic::Schema;
     
@@ -84,16 +83,14 @@ VERSION
       0.01
 
 DESCRIPTION
-    DBIx::Skinnyのresultsetみたいなインターフェースを提供す
-    る。
+    DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
 
 SCHEMA FEATURE
   relationship
       relationship $join_name, $join_table, { condition => $cond, type => $type };
 
-    "join"に指定する名前、joinするテーブル名、ハッシュ
-    引数に取る。 ハッシュは"add_join"に渡す値"condition",
-    "type"を含む。
+    "join"に指定する名前、joinするテーブル名、ハッシュ引数に取る。 
+    ハッシュは"add_join"に渡す値"condition","type"を含む。
 
   has_one
       has_one $join_name, $join_table, $condtion;
@@ -119,12 +116,11 @@ METHOD
   resultset_dbictic
       $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
-    DBIx::Classっぽい値を渡せる。$attrに使えるキーは"RESULTS
-    ET FEATURE"を参照。 "DBIx::Skiny::Iterator"を返す。
+    DBIx::Class::Resultsetっぽい値を渡せる。$attrに使えるキーは
+    "RESULTSET FEATURE"を参照。 "DBIx::Skiny::SQL"を継承したオブジェクトを返す。
 
   pager
-    "page"と"rows"を指定した場合、pagerにData::Pageオブジェク
-    トが設定される。
+    "page"と"rows"を指定した場合、pagerにData::Pageオブジェクトが設定される。
 
 RESULTSET FEATURE
   join
