@@ -82,7 +82,19 @@ DBIx::Skinny::SomethingDBICTic - dbic-like interface
     );
     
     my $itr = $rs->retrieve;
-
+    
+    $rs = $skinny->resultset_dbictic( 'user',
+        undef,
+        {
+            order_by => 'id DESC',
+            page     => 1,
+            rows     => 10,
+        }
+    );
+    
+    $itr = $rs->retrieve;
+    
+    my $pager = $itr->pager;
 
 =head1 VERSION
 
@@ -133,11 +145,10 @@ C<join>に指定する名前、joinするテーブル名、ハッシュを引数
   $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
 L<DBIx::Class::Resultset>っぽい値を渡せる。$attrに使えるキーはL</RESULTSET FEATURE>を参照。
-C<DBIx::Skiny::SQL>を継承したオブジェクトを返す。
+L<DBIx::Skiny::SQL>を継承したオブジェクトL<DBIx::Skiny::SQL::SomethingDBICTic>を返す。
 
-=head2 pager
-
-C<page>とC<rows>を指定した場合、pagerにL<Data::Page>オブジェクトが設定される。
+C<page>とC<rows>を指定した場合、c<retrieve>が返すイテレータのpagerメソッドで
+L<Data::Page>オブジェクトが返る。
 
 
 =head1 RESULTSET FEATURE

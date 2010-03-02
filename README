@@ -78,19 +78,34 @@ SYNOPSIS
         );
     
         my $itr = $rs->retrieve;
+    
+        $rs = $skinny->resultset_dbictic( 'user',
+            undef,
+            {
+                order_by => 'id DESC',
+                page     => 1,
+                rows     => 10,
+            }
+        );
+    
+        $itr = $rs->retrieve;
+    
+        my $pager = $itr->pager;
 
 VERSION
       0.01
 
 DESCRIPTION
-    DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
+    DBIx::Skinnyのresultsetみたいなインターフェースを提供す
+    る。
 
 SCHEMA FEATURE
   relationship
       relationship $join_name, $join_table, { condition => $cond, type => $type };
 
-    "join"に指定する名前、joinするテーブル名、ハッシュ引数に取る。 
-    ハッシュは"add_join"に渡す値"condition","type"を含む。
+    "join"に指定する名前、joinするテーブル名、ハッシュ
+    引数に取る。 ハッシュは"add_join"に渡す値"condition",
+    "type"を含む。
 
   has_one
       has_one $join_name, $join_table, $condtion;
@@ -116,11 +131,13 @@ METHOD
   resultset_dbictic
       $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
-    DBIx::Class::Resultsetっぽい値を渡せる。$attrに使えるキーは
-    "RESULTSET FEATURE"を参照。 "DBIx::Skiny::SQL"を継承したオブジェクトを返す。
+    DBIx::Class::Resultsetっぽい値を渡せる。$attrに使えるキー
+    は"RESULTSET FEATURE"を参照。
+    DBIx::Skiny::SQLを継承したオブジェクトDBIx::Skiny::SQL::Somet
+    hingDBICTicを返す。
 
-  pager
-    "page"と"rows"を指定した場合、pagerにData::Pageオブジェクトが設定される。
+    "page"と"rows"を指定した場合、c<retrieve>が返すイテレー
+    のpagerメソッドで Data::Pageオブジェクトが返る。
 
 RESULTSET FEATURE
   join
@@ -210,6 +227,9 @@ RESULTSET FEATURE
   use_sql_abstract
     $whereと"having"の値に対してSQL::Abstractが適用される。
 
+SEE ALSO
+    DBIx::Skinny, DBIx::Class::Resultset
+
 AUTHOR
     Makamaka Hannyaharamitu, <makamaka[at]cpan.org>
 
@@ -218,7 +238,4 @@ COPYRIGHT AND LICENSE
 
     This library is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.
-
-SEE ALSO
-    DBIx::Skinny, DBIx::Class
 

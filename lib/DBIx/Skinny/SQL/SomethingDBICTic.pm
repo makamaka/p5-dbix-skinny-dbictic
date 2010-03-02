@@ -41,7 +41,16 @@ sub setup_dbictic {
          ->_make_select() # must be called after _make_join
          ->_make_group_and_order()
          ->_make_where_closure()
-         ->_make_pager();
+}
+
+
+sub retrieve {
+    my ( $self ) = @_;
+    my $pager = $self->_pager;
+    return $self->SUPER::retrieve() unless $pager;
+    my $itr   = $self->SUPER::retrieve();
+    $itr->pager( $pager );
+    wantarray ? $itr->all : $itr;
 }
 
 
@@ -98,8 +107,6 @@ sub _make_join {
 
     local $Carp::CarpLevel = 1;
 
-#    $self->relationship2table( 'me' => $self->table );
-#print Dumper $self->{ _relationship2table };
     for my $name ( @{ $attr->{ join } } ) {
         my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
         my $val = {
@@ -163,9 +170,14 @@ sub _make_where_closure {
 }
 
 
-sub _make_pager {
+sub _pager {
     my ( $self ) = @_;
     my $attr = $self->attr_dbictic;
+    my $rows = $attr->{ rows };
+    my $page = $attr->{ page };
+
+    return unless ( $page and $rows );
+
     my $count_subref = $attr->{ count_subref };
 
     if ( $attr->{ group_by } and not exists $attr->{ count_subref } ) {
@@ -178,24 +190,19 @@ sub _make_pager {
         };
     }
 
-    if ( my $rows = $attr->{ rows } ) {
-        my ( $sql, $count_col ) = ( $count_subref || $DefaultCountSubref )->( $self->as_sql );
+    my ( $sql, $count_col ) = ( $count_subref || $DefaultCountSubref )->( $self->as_sql );
 
-        my $total  = $self->skinny->search_by_sql( $sql, $self->bind )->first->get_column( lc $count_col );
-        my $pager  = Data::Page->new();
-        my $page   = $attr->{ page } || 1;
-        my $offset = $rows * ( $page - 1 );
+    my $total  = $self->skinny->search_by_sql( $sql, $self->bind )->first->get_column( lc $count_col );
+    my $pager  = Data::Page->new();
+    my $offset = $rows * ( $page - 1 );
 
-        $pager->entries_per_page( $attr->{ rows } );
-        $pager->current_page( $attr->{ page } || 1 );
-        $pager->total_entries( $total );
+    $pager->entries_per_page( $attr->{ rows } );
+    $pager->current_page( $attr->{ page } || 1 );
+    $pager->total_entries( $total );
 
-        $self->limit( $rows );
-        $self->offset( $offset );
-        $self->pager( $pager );
-    }
-
-    $self;
+    $self->limit( $rows );
+    $self->offset( $offset );
+    return $pager;
 }
 
 
@@ -234,6 +241,12 @@ sub as_sql_having { # copied from original
 
 
 sub pager {
+    $_[0]->{ _pager } = $_[1] if @_ > 1;
+    $_[0]->{ _pager };
+}
+
+
+sub DBIx::Skinny::Iterator::pager {
     $_[0]->{ _pager } = $_[1] if @_ > 1;
     $_[0]->{ _pager };
 }

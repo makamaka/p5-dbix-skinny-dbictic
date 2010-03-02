@@ -45,13 +45,14 @@ $rs = $skinny->resultset_dbictic( 'user_profile',
     }
 );
 
-my $pager = $rs->pager;
+my $itr = $rs->retrieve;
+my $pager = $itr->pager;
 
 isa_ok( $pager, 'Data::Page' );
 
 is( $pager->total_entries, 5, '$pager->total_entries' );
 
-my $itr = $rs->retrieve;
+#my $itr = $rs->retrieve;
 
 is( $itr->count, 2 );
 is( $itr->next->id, 1 );
@@ -64,9 +65,9 @@ $rs = $skinny->resultset_dbictic( 'user_profile',
     }
 );
 
-is( $rs->pager->total_entries, 5, '$pager->total_entries' );
-
 $itr = $rs->retrieve;
+
+is( $itr->pager->total_entries, 5, '$pager->total_entries' );
 
 is( $itr->count, 2 );
 is( $itr->next->id, 3 );
@@ -80,7 +81,9 @@ $rs = $skinny->resultset_dbictic( 'user_profile',
     }
 );
 
-is( $rs->pager->total_entries, 2, 'group_by $pager->total_entries' );
+$itr = $rs->retrieve;
+
+is( $itr->pager->total_entries, 2, 'group_by $pager->total_entries' );
 
 
 done_testing();
