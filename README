@@ -1,0 +1,228 @@
+DBIx::Skinny::SomethingDBICTic version 0.01
+========================
+
+comma-separated values manipulator
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+NAME
+    DBIx::Skinny::SomethingDBICTic - dbic-like interface
+
+SYNOPSIS
+        package Your::Model::Schema;
+        use utf8;
+        use DBIx::Skinny::Schema;
+        use DBIx::Skinny::SomethingDBICTic::Schema;
+    
+        install_table 'user' => schema {
+            pk 'id';
+            columns qw/
+                id name
+            /;
+        
+            # Relationship
+            has_many 'profiles'
+                        => 'user_profile' => 'user.id = user_profile.user_id';
+            might_have 'status'
+                        => 'user_status'  => 'user.id = user_status.user_id';
+        
+            # 汎用
+            relationship 'hoge'
+                        => 'user_status' => {
+                            condition => 'user.id user_status.user_id',
+                            type => 'inner',
+                        };
+        };
+    
+        install_table 'user_profile' => schema {
+            pk 'id';
+            columns qw/
+                id user_id name value
+            /;
+        };
+    
+        install_table 'user_status' => schema {
+            pk 'user_id';
+            columns qw/
+                user_id status
+            /;
+        };
+    
+        package Your::Model;
+    
+        use DBIx::Skinny setup => +{
+            dsn => 'dbi:SQLite:',
+            username => '',
+            password => '',
+        };
+    
+        use DBIx::Skinny::Mixin modules => [ qw(SomethingDBICTic) ];
+    
+        package main;
+    
+        my $skinny = Your::Model->new;
+    
+        my $rs = $skinny->resultset_dbictic( 'user',
+            { 'user.id' => 1 },
+            {
+                'join'    => [ 'profiles' ],
+                '+select' => [ qw( profiles.name profiles.value ) ],
+                '+as'     => [ qw( prof_name prof_value ) ],
+            }
+        );
+    
+        my $itr = $rs->retrieve;
+
+VERSION
+      0.01
+
+DESCRIPTION
+    DBIx::Skinnyのresultsetみたいなインターフェースを提供す
+    る。
+
+SCHEMA FEATURE
+  relationship
+      relationship $join_name, $join_table, { condition => $cond, type => $type };
+
+    "join"に指定する名前、joinするテーブル名、ハッシュ
+    引数に取る。 ハッシュは"add_join"に渡す値"condition",
+    "type"を含む。
+
+  has_one
+      has_one $join_name, $join_table, $condtion;
+
+    少しだけ楽をするためのもの。
+
+  might_have
+      might_have $join_name, $join_table, $condtion;
+
+    少しだけ楽をするためのもの。
+
+  has_many
+      has_many $join_name, $join_table, $condtion;
+
+    少しだけ楽をするためのもの。
+
+  belongs_to
+      belongs_to $join_name, $join_table, $condtion;
+
+    少しだけ楽をするためのもの。
+
+METHOD
+  resultset_dbictic
+      $rs = $skinny->resultset_dbictic( $table, $where, $attr );
+
+    DBIx::Classっぽい値を渡せる。$attrに使えるキーは"RESULTS
+    ET FEATURE"を参照。 "DBIx::Skiny::Iterator"を返す。
+
+  pager
+    "page"と"rows"を指定した場合、pagerにData::Pageオブジェク
+    トが設定される。
+
+RESULTSET FEATURE
+  join
+      join => $listref
+
+    schema内でrelationshipで設定した名前を指定する。
+
+  select
+      select => $listref
+
+    selectしたいカラムを指定する。
+
+  as
+      as => $listref
+
+    selectで指定したカラムのエイリアスを設定する。
+
+  +select
+      +select => $listref
+
+    デフォルトで設定されてるカラムに追加する。
+
+  +as
+      +as => $listref
+
+    +selectで指定したカラムのエイリアスを設定する。
+
+  order_by
+      order_by => $scalar
+
+    order by。
+
+  limit
+      limit => $scalar
+
+    limit。
+
+  page
+      page => $scalar
+
+    rowsと一緒に使ってページを指定する。
+
+  rows
+      rows => $scalar
+
+    1ページに載せる行数。
+
+  group_by
+      group_by => $listref
+
+    group by。
+
+  having
+      having => $hashref
+      having => $arrayref
+
+    havingの指定。
+
+  count_subref
+      count_subref => sub {
+          my $sql = shift;
+          return ( $str, $column );
+      }
+
+    page指定したときのcount用ステートメンスとカラムを返
+    すサブルーチンリファレンス。引数にSQL文をとる。
+    デフォルトで
+
+        sub {
+            my $str = $_[0];
+            $str =~ s{^\s*SELECT\s+(?:.+?)\s+FROM}{SELECT COUNT(*) FROM}i;
+            return ( $str, 'COUNT(*)' );
+        };
+
+    となる。group_byを使用している場合は
+
+        sub {
+            my $str = $_[0];
+            my $column =  sprintf( 'COUNT(DISTINCT(%s))', join( ',', @{ $attr->{ group_by } } ) );
+            $str =~ s{^\s*SELECT\s+(?:.+?)\s+FROM}{SELECT $column FROM}i;
+            $str =~ s{GROUP\s+BY\s+(?:[.\w]+,?\s*){1,}}{}i;
+            return ( $str, $column );
+        };
+
+    になってる。
+
+  use_sql_abstract
+    $whereと"having"の値に対してSQL::Abstractが適用される。
+
+AUTHOR
+    Makamaka Hannyaharamitu, <makamaka[at]cpan.org>
+
+COPYRIGHT AND LICENSE
+    Copyright 2010 by Makamaka Hannyaharamitu
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+SEE ALSO
+    DBIx::Skinny
+
