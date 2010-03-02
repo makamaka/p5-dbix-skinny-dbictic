@@ -220,5 +220,5 @@ COPYRIGHT AND LICENSE
     under the same terms as Perl itself.
 
 SEE ALSO
-    DBIx::Skinny
+    DBIx::Skinny, DBIx::Class
 
