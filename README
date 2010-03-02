@@ -1,7 +1,7 @@
 DBIx::Skinny::SomethingDBICTic version 0.01
 ========================
 
-comma-separated values manipulator
+DBIx::Class-like interface
 
 INSTALLATION
 
