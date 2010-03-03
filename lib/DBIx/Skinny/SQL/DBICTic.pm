@@ -1,8 +1,19 @@
-package DBIx::Skinny::SQL::SomethingDBICTic;
+package DBIx::Skinny::SQL::DBICTic;
 
 use strict;
 use warnings;
-use base qw( DBIx::Skinny::SQL );
+
+# This module requires the below methods
+#  - skinny, add_join, add_select, order, limit, offset, group, add_having, add_where
+# And assumed to call with DBIx::Skinny::SQL::OverwriteMethods and DBIx::Skinny::SQL( or an inherited class )
+#    before this module is used.
+#
+# ex.)
+#
+# package DBIx::Skinny::SQL::DBICTic::FooBar;
+# use base qw( DBIx::Skinny::SQL::OverwriteMethods DBIx::Skinny::SQL DBIx::Skinny::SQL::DBICTic );
+# ....
+
 use Data::Page;
 use SQL::Abstract;
 use DBIx::Skinny::Accessor;
@@ -22,6 +33,9 @@ my $DefaultCountSubref = sub {
     return ( $str, 'COUNT(*)' );
 };
 
+#
+# Public API
+#
 
 sub relationship2table {
     my ( $self, $name, $table ) = @_;
@@ -44,13 +58,34 @@ sub setup_dbictic {
 }
 
 
-sub retrieve {
+#
+# Private
+#
+
+sub _make_join {
     my ( $self ) = @_;
-    my $pager = $self->_pager;
-    return $self->SUPER::retrieve() unless $pager;
-    my $itr   = $self->SUPER::retrieve();
-    $itr->pager( $pager );
-    wantarray ? $itr->all : $itr;
+    my $attr = $self->attr_dbictic;
+
+    return $self->from( [ $self->table ] ) && $self unless ( $attr->{ 'join' } );
+
+    $self->from( [] );
+
+    my $rels = $self->skinny->schema->relationship_info->{ $self->table } || {};
+
+    local $Carp::CarpLevel = 1;
+
+    for my $name ( @{ $attr->{ join } } ) {
+        my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
+        my $val = {
+            condition => $rel->{ condition },
+            type      => $rel->{ type },
+            table     => $rel->{ table },
+        };
+        $self->add_join( $rel->{ base_table } => $val );
+        $self->relationship2table( $name => $rel->{ table } );
+    }
+
+    $self;
 }
 
 
@@ -89,33 +124,6 @@ sub _make_select {
 
         my $as  = $attr->{ 'as' }->[ $i ];
         $self->add_select( $col => $as );
-    }
-
-    $self;
-}
-
-
-sub _make_join {
-    my ( $self ) = @_;
-    my $attr = $self->attr_dbictic;
-
-    return $self->from( [ $self->table ] ) && $self unless ( $attr->{ 'join' } );
-
-    $self->from( [] );
-
-    my $rels = $self->skinny->schema->relationship_info;
-
-    local $Carp::CarpLevel = 1;
-
-    for my $name ( @{ $attr->{ join } } ) {
-        my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
-        my $val = {
-            condition => $rel->{ condition },
-            type      => $rel->{ type },
-            table     => $rel->{ join_table },
-        };
-        $self->add_join( $rel->{ base_table } => $val );
-        $self->relationship2table( $name => $rel->{ join_table } );
     }
 
     $self;
@@ -206,45 +214,9 @@ sub _pager {
 }
 
 
-sub as_sql_where { # copied from original
-    my $self = shift;
-
-    if ( my $where = $self->where_used_by_sql_abstract ) {
-        # この処理の結果、where_valuesは効かない
-        my $sql = SQL::Abstract->new;
-        my ( $statement, @bind ) = $sql->where( $where );
-        @{ $self->bind } = @bind;
-        return $statement;
-    }
-
-    $self->where && @{ $self->where } ?
-        'WHERE ' . join(' AND ', @{ $self->where }) . "\n" :
-        '';
-}
-
-
-sub as_sql_having { # copied from original
-    my $self = shift;
-
-    if ( my $having = $self->having_used_by_sql_abstract ) {
-        my $sql = SQL::Abstract->new;
-        my ( $statement, @bind ) = $sql->where( $having );
-        @{ $self->bind } = @bind;
-        $statement =~ s{^\s*WHERE}{HAVING};
-        return $statement;
-    }
-
-    $self->having && @{ $self->having } ?
-        'HAVING ' . join(' AND ', @{ $self->having }) . "\n" :
-        '';
-}
-
-
-sub pager {
-    $_[0]->{ _pager } = $_[1] if @_ > 1;
-    $_[0]->{ _pager };
-}
-
+#
+# DBIx::Skinny::Iterator
+#
 
 sub DBIx::Skinny::Iterator::pager {
     $_[0]->{ _pager } = $_[1] if @_ > 1;
@@ -259,12 +231,25 @@ __END__
 
 =head1 NAME
 
-DBIx::Skinny::SQL::SomethingDBICTic
+DBIx::Skinny::SQL::DBICTic
 
 =head1 SYNOPSIS
 
+=head1 METHODS
+
+=head2 relationship2table
+
+=head2 setup_dbictic
+
+=head1 AUTHOR
+
+Makamaka Hannyaharamitu, E<lt>makamaka[at]cpan.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2010 by Makamaka Hannyaharamitu
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
 
 =cut
-
-
-

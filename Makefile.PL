@@ -1,8 +1,9 @@
 use inc::Module::Install;
-name 'DBIx-Skinny-SomethingDBICTic';
-all_from 'lib/DBIx/Skinny/SomethingDBICTic.pm';
- 
+name 'DBIx-Skinny-DBICTic';
+all_from 'lib/DBIx/Skinny/DBICTic.pm';
+
 requires 'DBIx::Skinny';
+requires 'UNIVERSAL::require';
 
 author_tests('xt');
 

@@ -5,7 +5,7 @@ use DBIx::Skinny setup => +{
     password => '',
 };
 
-use DBIx::Skinny::Mixin modules => [ qw(SomethingDBICTic) ];
+use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
 
 sub setup_test_db {
     my $self = shift;

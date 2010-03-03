@@ -1,4 +1,4 @@
-package DBIx::Skinny::SomethingDBICTic;
+package DBIx::Skinny::DBICTic;
 
 use strict;
 use warnings;
@@ -14,13 +14,13 @@ __END__
 
 =head1 NAME
 
-DBIx::Skinny::SomethingDBICTic - dbic-like interface
+DBIx::Skinny::DBICTic - dbic-like interface
 
 =head1 SYNOPSIS
 
     package Your::Model::Schema;
     use DBIx::Skinny::Schema;
-    use DBIx::Skinny::SomethingDBICTic::Schema;
+    use DBIx::Skinny::DBICTic::Schema;
     
     install_table 'user' => schema {
         pk 'id';
@@ -65,7 +65,7 @@ DBIx::Skinny::SomethingDBICTic - dbic-like interface
         password => '',
     };
     
-    use DBIx::Skinny::Mixin modules => [ qw(SomethingDBICTic) ];
+    use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
     
     
     package main;
@@ -103,7 +103,6 @@ DBIx::Skinny::SomethingDBICTic - dbic-like interface
 =head1 DESCRIPTION
 
 DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
-
 
 =head1 SCHEMA FEATURE
 
@@ -145,7 +144,7 @@ C<join>に指定する名前、joinするテーブル名、ハッシュを引数
   $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
 L<DBIx::Class::Resultset>っぽい値を渡せる。$attrに使えるキーはL</RESULTSET FEATURE>を参照。
-L<DBIx::Skiny::SQL>を継承したオブジェクトL<DBIx::Skiny::SQL::SomethingDBICTic>を返す。
+L<DBIx::Skiny::SQL>を継承したオブジェクトL<DBIx::Skiny::SQL::DBICTic>を返す。
 
 C<page>とC<rows>を指定した場合、c<retrieve>が返すイテレータのpagerメソッドで
 L<Data::Page>オブジェクトが返る。
@@ -256,7 +255,8 @@ C<$where>とC<having>の値に対してL<SQL::Abstract>が適用される。
 =head1 SEE ALSO
 
 L<DBIx::Skinny>,
-L<DBIx::Class::Resultset>
+L<DBIx::Class::Resultset>,
+L<SQL::Abstract>
 
 =head1 AUTHOR
 

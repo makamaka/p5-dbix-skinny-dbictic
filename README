@@ -1,4 +1,4 @@
-DBIx::Skinny::SomethingDBICTic version 0.01
+DBIx::Skinny::DBICTic version 0.01
 ========================
 
 DBIx::Class-like interface
@@ -13,12 +13,12 @@ To install this module type the following:
    make install
 
 NAME
-    DBIx::Skinny::SomethingDBICTic - dbic-like interface
+    DBIx::Skinny::DBICTic - dbic-like interface
 
 SYNOPSIS
         package Your::Model::Schema;
         use DBIx::Skinny::Schema;
-        use DBIx::Skinny::SomethingDBICTic::Schema;
+        use DBIx::Skinny::DBICTic::Schema;
     
         install_table 'user' => schema {
             pk 'id';
@@ -62,7 +62,7 @@ SYNOPSIS
             password => '',
         };
     
-        use DBIx::Skinny::Mixin modules => [ qw(SomethingDBICTic) ];
+        use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
     
         package main;
     
@@ -96,14 +96,13 @@ VERSION
       0.01
 
 DESCRIPTION
-    DBIx::Skinnyのresultsetみたいなインターフェースを提供す
-    る。
+    DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
 
 SCHEMA FEATURE
   relationship
       relationship $join_name, $join_table, { condition => $cond, type => $type };
 
-    "join"に指定する名前、joinするテーブル名、ハッシュ
+    "join"に指定する名前、joinするテーブル名、ハッシュを
     引数に取る。 ハッシュは"add_join"に渡す値"condition",
     "type"を含む。
 
@@ -131,13 +130,11 @@ METHOD
   resultset_dbictic
       $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
-    DBIx::Class::Resultsetっぽい値を渡せる。$attrに使えるキー
-    は"RESULTSET FEATURE"を参照。
-    DBIx::Skiny::SQLを継承したオブジェクトDBIx::Skiny::SQL::Somet
-    hingDBICTicを返す。
+    DBIx::Class::Resultsetっぽい値を渡せる。$attrに使えるキーは"RESULTSET FEATURE"を参照。
+    DBIx::Skiny::SQLを継承したオブジェクトDBIx::Skiny::SQL::DBICTicを返す。
 
-    "page"と"rows"を指定した場合、c<retrieve>が返すイテレー
-    のpagerメソッドで Data::Pageオブジェクトが返る。
+    "page"と"rows"を指定した場合、c<retrieve>が返すイテレータの
+    pagerメソッドで Data::Pageオブジェクトが返る。
 
 RESULTSET FEATURE
   join
@@ -202,9 +199,8 @@ RESULTSET FEATURE
           return ( $str, $column );
       }
 
-    page指定したときのcount用ステートメンスとカラムを返
-    すサブルーチンリファレンス。引数にSQL文をとる。
-    デフォルトで
+    page指定したときのcount用ステートメンスとカラムを返すサブルーチンリファレンス。
+    引数にSQL文をとる。デフォルトで
 
         sub {
             my $str = $_[0];
@@ -228,7 +224,7 @@ RESULTSET FEATURE
     $whereと"having"の値に対してSQL::Abstractが適用される。
 
 SEE ALSO
-    DBIx::Skinny, DBIx::Class::Resultset
+    DBIx::Skinny, DBIx::Class::Resultset, SQL::Abstract
 
 AUTHOR
     Makamaka Hannyaharamitu, <makamaka[at]cpan.org>

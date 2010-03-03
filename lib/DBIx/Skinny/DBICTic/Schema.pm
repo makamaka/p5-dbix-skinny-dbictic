@@ -1,4 +1,4 @@
-package DBIx::Skinny::SomethingDBICTic::Schema;
+package DBIx::Skinny::DBICTic::Schema;
 
 use strict;
 use warnings;
@@ -25,24 +25,23 @@ sub import {
 sub relationship_info { $_[0]->schema_info->{ _relationship } ||= {}; }
 
 
-sub relationship ($$$;$) {
-    my ( $name, $join_table, $args, $class ) = @_;
+sub relationship ($$;$) {
+    my ( $name, $args, $class ) = @_;
 
     $class ||= caller;
 
     my $base_table = $class->schema_info->{ _installing_table };
 
 # いらないか
-#    unless ( $base_table =~ /[\s.]/ ) { # テーブル名のみならaliasとしてmeをつける
+#    unless ( $base_table =~ /[\s.]/ ) { # aliasとしてmeをつける
 #        $base_table .= ' AS me';
 #    }
-
+#    my $join_table = $args->{ table };
 #    unless ( $join_table =~ /[\s.]/ ) { # テーブル名のみならaliasとしてrelationship nameをつける
 #        $join_table .= ' AS ' . $name;
 #    }
 
-    $class->relationship_info->{ $name } = {
-        join_table   => $join_table,
+    $class->relationship_info->{ $base_table }->{ $name } = {
         base_table   => $base_table,
         %$args,
     };
@@ -55,25 +54,25 @@ sub relationship ($$$;$) {
 
 sub has_one ($) {
     my ( $name, $join_table, $condition ) = @_;
-    relationship( $name, $join_table, { type => 'inner', condition => $condition }, caller );
+    relationship( $name, { table => $join_table, type => 'inner', condition => $condition }, caller );
 }
 
 
 sub might_have ($$$) {
     my ( $name, $join_table, $condition ) = @_;
-    relationship( $name, $join_table, { type => 'left', condition => $condition }, caller );
+    relationship( $name, { table => $join_table, type => 'left', condition => $condition }, caller );
 }
 
 
 sub has_many ($$$) {
     my ( $name, $join_table, $condition ) = @_;
-    relationship( $name, $join_table, { type => 'left', condition => $condition }, caller );
+    relationship( $name, { table => $join_table, type => 'left', condition => $condition }, caller );
 }
 
 
 sub belongs_to ($) {
     my ( $name, $join_table, $condition ) = @_;
-    relationship( $name, $join_table, { type => 'inner', condition => $condition }, caller );
+    relationship( $name, { table => $join_table, type => 'inner', condition => $condition }, caller );
 }
 
 

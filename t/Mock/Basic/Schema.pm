@@ -1,7 +1,7 @@
 package Mock::Basic::Schema;
 use utf8;
 use DBIx::Skinny::Schema;
-use DBIx::Skinny::SomethingDBICTic::Schema;
+use DBIx::Skinny::DBICTic::Schema;
 
 
 install_table 'user' => schema {
@@ -13,7 +13,8 @@ install_table 'user' => schema {
     has_many 'profiles' => 'user_profile' => 'user.id = user_profile.user_id';
     might_have 'status' => 'user_status'  => 'user.id = user_status.user_id';
     # 汎用
-    relationship 'hoge' => 'user_status' => { condition => 'user.id user_status.user_id', type => 'inner' };
+    relationship 'hoge'
+        => { table => 'user_status', condition => 'user.id = user_status.user_id', type => 'inner' };
 };
 
 
