@@ -96,11 +96,17 @@ sub _make_select {
 
     local $Carp::CarpLevel = 1;
 
-    if ( not exists $attr->{ 'select' } ) {
+    if ( not exists $attr->{ 'select' } and not exists $attr->{ 'as' } ) {
         my $schema = $self->skinny->schema->schema_info->{ $table };
         my $prefix = exists $attr->{ 'me_alias' } ? $attr->{ 'me_alias' } . '.' : "$table.";
         @{ $attr->{ 'select' } } = map { $prefix . $_ } @{ $schema->{ columns } };
         @{ $attr->{ 'as' }  }    = @{ $schema->{ columns } };
+    }
+    elsif ( exists $attr->{ 'select' } and not exists $attr->{ 'as' } ) {
+        @{ $attr->{ 'as' }  } = @{ $attr->{ 'select' } };
+    }
+    elsif ( exists $attr->{ 'as' } ) {
+        Carp::croak("'as' is set but 'select' is not set.");
     }
 
     if ( exists $attr->{ '+select' } ) {

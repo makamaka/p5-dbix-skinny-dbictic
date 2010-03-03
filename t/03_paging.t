@@ -1,6 +1,7 @@
 use lib './t';
 use Test::More;
-use Test::Exception;
+use strict;
+use warnings;
 
 BEGIN {
     eval "use DBD::SQLite";
@@ -38,7 +39,7 @@ is( $skinny->search( 'user_status' )->count, 2, 'user_status table ok' );
 
 #
 
-$rs = $skinny->resultset_dbictic( 'user_profile',
+my $rs = $skinny->resultset_dbictic( 'user_profile',
     undef,
     {
         page => 1, rows => 2, order_by => 'id ASC',
@@ -84,6 +85,24 @@ $rs = $skinny->resultset_dbictic( 'user_profile',
 $itr = $rs->retrieve;
 
 is( $itr->pager->total_entries, 2, 'group_by $pager->total_entries' );
+
+
+$rs = $skinny->resultset_dbictic( 'user_profile',
+    undef,
+    {
+        select => [ 'id' ],
+        page => 1, rows => 10, order_by => 'id ASC',
+        count_subref => sub {
+            my ( $sql ) = @_;
+            like( $sql, qr/SELECT id\s+FROM/, 'count_subref' );
+            return ( 'SELECT count(*) as foobar FROM user_profile', 'foobar' );
+        },
+    }
+);
+
+$itr = eval q{ $rs->retrieve };
+
+ok( $itr );
 
 
 done_testing();

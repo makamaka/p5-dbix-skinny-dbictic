@@ -1,6 +1,7 @@
 use lib './t';
 use Test::More;
-use Test::Exception;
+use strict;
+use warnings;
 
 BEGIN {
     eval "use DBD::SQLite";
