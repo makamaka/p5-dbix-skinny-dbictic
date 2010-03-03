@@ -102,7 +102,7 @@ SCHEMA FEATURE
   relationship
       relationship $join_name, { table => $table, condition => $cond, type => $type };
 
-    "join"に指定する名前、joinするテーブル名、ハッシュを引数に取る。 
+    "join"に指定する名前、ハッシュを引数に取る。 
     ハッシュは"add_join"に渡す値"table", "condition", "type"を含む。
 
   has_one
