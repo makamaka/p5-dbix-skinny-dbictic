@@ -108,10 +108,10 @@ DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
 
 =head2 relationship
 
-  relationship $join_name, $join_table, { condition => $cond, type => $type };
+  relationship $join_name, { table => $table, condition => $cond, type => $type };
 
 C<join>に指定する名前、joinするテーブル名、ハッシュを引数に取る。
-ハッシュはC<add_join>に渡す値C<condition>, C<type>を含む。
+ハッシュはC<add_join>に渡す値C<table>, C<condition>, C<type>を含む。
 
 =head2 has_one
 

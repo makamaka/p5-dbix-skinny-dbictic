@@ -100,11 +100,10 @@ DESCRIPTION
 
 SCHEMA FEATURE
   relationship
-      relationship $join_name, $join_table, { condition => $cond, type => $type };
+      relationship $join_name, { table => $table, condition => $cond, type => $type };
 
-    "join"に指定する名前、joinするテーブル名、ハッシュを
-    引数に取る。 ハッシュは"add_join"に渡す値"condition",
-    "type"を含む。
+    "join"に指定する名前、joinするテーブル名、ハッシュを引数に取る。 
+    ハッシュは"add_join"に渡す値"table", "condition", "type"を含む。
 
   has_one
       has_one $join_name, $join_table, $condtion;
