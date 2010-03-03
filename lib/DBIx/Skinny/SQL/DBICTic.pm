@@ -188,7 +188,7 @@ sub _pager {
 
     my $count_subref = $attr->{ count_subref };
 
-    if ( $attr->{ group_by } and not exists $attr->{ count_subref } ) {
+    if ( $attr->{ group_by } and not $count_subref ) {
         $count_subref = sub {
             my $str = $_[0];
             my $column =  sprintf( 'COUNT(DISTINCT(%s))', join( ',', @{ $attr->{ group_by } } ) );
@@ -204,12 +204,13 @@ sub _pager {
     my $pager  = Data::Page->new();
     my $offset = $rows * ( $page - 1 );
 
-    $pager->entries_per_page( $attr->{ rows } );
-    $pager->current_page( $attr->{ page } || 1 );
+    $pager->entries_per_page( $rows );
+    $pager->current_page( $page );
     $pager->total_entries( $total );
 
     $self->limit( $rows );
     $self->offset( $offset );
+
     return $pager;
 }
 
