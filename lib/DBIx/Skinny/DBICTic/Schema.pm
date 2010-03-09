@@ -52,7 +52,7 @@ sub relationship ($$;$) {
 # builtin
 #
 
-sub has_one ($) {
+sub has_one ($$$) {
     my ( $name, $join_table, $condition ) = @_;
     relationship( $name, { table => $join_table, type => 'inner', condition => $condition }, caller );
 }
@@ -70,7 +70,7 @@ sub has_many ($$$) {
 }
 
 
-sub belongs_to ($) {
+sub belongs_to ($$$) {
     my ( $name, $join_table, $condition ) = @_;
     relationship( $name, { table => $join_table, type => 'inner', condition => $condition }, caller );
 }
