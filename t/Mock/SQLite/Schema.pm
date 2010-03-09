@@ -8,7 +8,7 @@ install_table 'users' => schema {
     pk 'id';
     columns qw( id name );
     # Relationship
-    has_many 'books' => 'user_book' => 'users.id = user_book.user_id';
+    has_many 'has_books' => 'user_book' => 'users.id = user_book.user_id';
 };
 
 

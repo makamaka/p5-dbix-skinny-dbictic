@@ -2,7 +2,8 @@ package Mock::SQLite;
 
 use DBIx::Skinny::Profiler::ProfileLogger;
 use DBIx::Skinny setup => +{
-    dsn => 'dbi:SQLite:',
+#    dsn => 'dbi:SQLite:',
+    dsn => 'dbi:SQLite:test.db',
     username => '',
     password => '',
     profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
@@ -54,6 +55,40 @@ sub setup_test_db {
         )
     });
 
+
+    my $user_a = $self->insert( 'users', { name => 'a' } );
+    my $user_b = $self->insert( 'users', { name => 'b' } );
+    my $user_c = $self->insert( 'users', { name => 'c' } );
+    my $user_d = $self->insert( 'users', { name => 'd' } );
+
+    my $author_a = $self->insert( 'authors', { name => 'AUTHOR A' } );
+    my $author_b = $self->insert( 'authors', { name => 'AUTHOR B' } );
+    my $author_c = $self->insert( 'authors', { name => 'AUTHOR C' } );
+    my $author_d = $self->insert( 'authors', { name => 'AUTHOR D' } );
+
+    my $book_a1  = $self->insert( 'books', { title => 'BOOK A1', author_id => $author_a->id } );
+    my $book_a2  = $self->insert( 'books', { title => 'BOOK A2', author_id => $author_a->id } );
+    my $book_a3  = $self->insert( 'books', { title => 'BOOK A3', author_id => $author_a->id } );
+    my $book_b1  = $self->insert( 'books', { title => 'BOOK B1', author_id => $author_b->id } );
+    my $book_b2  = $self->insert( 'books', { title => 'BOOK B2', author_id => $author_b->id } );
+    my $book_c1  = $self->insert( 'books', { title => 'BOOK C1', author_id => $author_c->id } );
+
+    # user_a
+    $self->insert( 'user_book', { user_id => $user_a->id, book_id => $book_a1->id } );
+    $self->insert( 'user_book', { user_id => $user_a->id, book_id => $book_a2->id } );
+    $self->insert( 'user_book', { user_id => $user_a->id, book_id => $book_b1->id } );
+    $self->insert( 'user_book', { user_id => $user_a->id, book_id => $book_c1->id } );
+
+    # user_b
+    $self->insert( 'user_book', { user_id => $user_b->id, book_id => $book_a1->id } );
+    $self->insert( 'user_book', { user_id => $user_b->id, book_id => $book_b1->id } );
+    $self->insert( 'user_book', { user_id => $user_b->id, book_id => $book_b2->id } );
+    $self->insert( 'user_book', { user_id => $user_b->id, book_id => $book_c1->id } );
+
+    # user_c
+    $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_a1->id } );
+    $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_a2->id } );
+    $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_c1->id } );
 
 }
 
