@@ -1,4 +1,12 @@
-Revision history for Perl extension DBIx::Skinny::SomethingDBICTic.
+Revision history for Perl extension DBIx::Skinny::DBICTic.
+
+0.0X
+	- added nested join feature.
+	- fixed select feature
+	- rewrite tests
+
+0.02
+	- modified prototypes of belongs_to and has_one (DBIx::Skinny::DBICTic::Schema)
 
 0.01  Tue Mar  2 15:29:18 2010
 	- original version
