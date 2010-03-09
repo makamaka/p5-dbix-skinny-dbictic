@@ -62,6 +62,35 @@ sub setup_dbictic {
 # Private
 #
 
+
+sub _set_join {
+    my ( $self, $name, $table, $left ) = @_;
+    my $rel_info = $self->skinny->schema->relationship_info;
+    my $rels = $rel_info->{ $table } || {};
+    my $next_join;
+
+    if ( ref $name eq 'HASH' ) {
+        # Don't use 'each'. 'each' does not reset key index iteration.
+        ( $name, $next_join ) = map { $_ => $name->{ $_ } } ( keys %$name )[0];
+    }
+
+    my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
+    my $val = {
+        condition => $rel->{ condition },
+        type      => $left || $rel->{ type },
+        table     => $rel->{ table },
+    };
+    $self->add_join( $rel->{ base_table } => $val );
+    $self->relationship2table( $name => $rel->{ table } );
+
+    if ( $next_join ) {
+        my $left = ( $left or $rel->{ type} eq 'left' ) ? 'left' : ''; # 強制的にleft joinにするため
+        $self->_set_join( $next_join, $rel->{ table }, $left );
+    }
+
+}
+
+
 sub _make_join {
     my ( $self ) = @_;
     my $attr = $self->attr_dbictic;
@@ -75,14 +104,7 @@ sub _make_join {
     local $Carp::CarpLevel = 1;
 
     for my $name ( @{ $attr->{ join } } ) {
-        my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
-        my $val = {
-            condition => $rel->{ condition },
-            type      => $rel->{ type },
-            table     => $rel->{ table },
-        };
-        $self->add_join( $rel->{ base_table } => $val );
-        $self->relationship2table( $name => $rel->{ table } );
+        $self->_set_join( $name, $self->table );
     }
 
     $self;
@@ -91,34 +113,39 @@ sub _make_join {
 
 sub _make_select {
     my ( $self ) = @_;
-    my $table = $self->table;
-    my $attr  = $self->attr_dbictic;
+    my $table     = $self->table;
+    my $attr_org  = $self->attr_dbictic;
+    my $attr = {};
 
     local $Carp::CarpLevel = 1;
 
+    if ( not exists $attr_org->{ 'select' } and exists $attr_org->{ 'as' } ) {
+        Carp::croak("'as' is set but 'select' is not set.");
+    }
+
+    @{ $attr->{ 'select' }  } = @{ $attr_org->{ 'select' } } if (  exists $attr_org->{ 'select' } );
+    @{ $attr->{ 'as'     }  } = @{ $attr_org->{ 'as'     } } if (  exists $attr_org->{ 'as'     } );
+
     if ( not exists $attr->{ 'select' } and not exists $attr->{ 'as' } ) {
         my $schema = $self->skinny->schema->schema_info->{ $table };
-        my $prefix = exists $attr->{ 'me_alias' } ? $attr->{ 'me_alias' } . '.' : "$table.";
+        my $prefix = exists $attr_org->{ 'me_alias' } ? $attr_org->{ 'me_alias' } . '.' : "$table.";
         @{ $attr->{ 'select' } } = map { $prefix . $_ } @{ $schema->{ columns } };
         @{ $attr->{ 'as' }  }    = @{ $schema->{ columns } };
     }
     elsif ( exists $attr->{ 'select' } and not exists $attr->{ 'as' } ) {
-        @{ $attr->{ 'as' }  } = @{ $attr->{ 'select' } };
-    }
-    elsif ( exists $attr->{ 'as' } ) {
-        Carp::croak("'as' is set but 'select' is not set.");
+        @{ $attr->{ 'as' }  }     = @{ $attr_org->{ 'select' } };
     }
 
-    if ( exists $attr->{ '+select' } ) {
-        push @{ $attr->{ 'select' } }, @{ $attr->{ '+select' } };
-        if ( exists $attr->{ '+as' } ) {
-            push @{ $attr->{ 'as' } }, @{ $attr->{ '+as' } };
+    if ( exists $attr_org->{ '+select' } ) {
+        push @{ $attr->{ 'select' } }, @{ $attr_org->{ '+select' } };
+        if ( exists $attr_org->{ '+as' } ) {
+            push @{ $attr->{ 'as' } }, @{ $attr_org->{ '+as' } };
         }
         else {
-            push @{ $attr->{ 'as' } }, @{ $attr->{ '+select' } };
+            push @{ $attr->{ 'as' } }, @{ $attr_org->{ '+select' } };
         }
     }
-
+#print STDERR Dumper $attr;
     unless ( @{ $attr->{ 'select' } } == @{ $attr->{ 'as' } } ) {
         Carp::croak("'select' number and 'as' number are mismatched.");
     }
@@ -167,6 +194,8 @@ sub _make_where_closure {
     my ( $self ) = @_;
     my $attr  = $self->attr_dbictic;
     my $where = $self->where_dbictic;
+
+    return $self unless $where;
 
     if ( $attr->{ use_sql_abstract } ) {
         $self->where_used_by_sql_abstract( $where );
