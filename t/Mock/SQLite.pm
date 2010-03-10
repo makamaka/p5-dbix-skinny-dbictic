@@ -1,12 +1,11 @@
 package Mock::SQLite;
 
-use DBIx::Skinny::Profiler::ProfileLogger;
+#use DBIx::Skinny::Profiler::ProfileLogger;
 use DBIx::Skinny setup => +{
-#    dsn => 'dbi:SQLite:',
-    dsn => 'dbi:SQLite:test.db',
+    dsn => 'dbi:SQLite:',
     username => '',
     password => '',
-    profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
+#    profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
 };
 
 use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];

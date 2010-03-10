@@ -1,8 +1,8 @@
 package Mock::Pg;
 
-use DBIx::Skinny::Profiler::ProfileLogger;
+#use DBIx::Skinny::Profiler::ProfileLogger;
 use DBIx::Skinny setup => +{
-    profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
+#    profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
 };
 
 use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
