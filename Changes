@@ -1,6 +1,6 @@
 Revision history for Perl extension DBIx::Skinny::DBICTic.
 
-0.0X
+0.03  Wed Mar 10 15:28:50 2010
 	- added nested join feature.
 	- fixed select feature
 	- rewrite tests
