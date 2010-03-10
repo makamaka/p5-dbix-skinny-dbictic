@@ -16,35 +16,6 @@ use Mock::SQLite;
 my $skinny = Mock::SQLite->new;
 my ( $itr, $rs );
 
-subtest 'check base data' => sub {
-    $skinny->setup_test_db;
-
-    is( $skinny->search( 'users' )->count, 4, 'users' );
-    is( $skinny->search( 'authors' )->count, 4, 'authors' );
-    is( $skinny->search( 'books' )->count, 6, 'books' );
-    is( $skinny->search( 'user_book' )->count, 11, 'user_book' );
-
-    done_testing;
-};
-
-
-subtest 'group_by' => sub {
-    $rs = $skinny->resultset_dbictic( 'users',
-        {},
-        {
-            'join'     => [ qw/ has_books / ],
-            'group_by' => [ qw/ users.id / ],
-        },
-    );
-
-    $itr = $rs->retrieve;
-
-    is( $itr->count, 4, 'group_by users.id' );
-
-    done_testing;
-};
-
-
 
 done_testing();
 
