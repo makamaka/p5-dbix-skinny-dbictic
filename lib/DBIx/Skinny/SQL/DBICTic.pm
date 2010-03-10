@@ -37,12 +37,6 @@ my $DefaultCountSubref = sub {
 # Public API
 #
 
-sub relationship2table {
-    my ( $self, $name, $table ) = @_;
-    $self->{ _relationship2table }->{ $name } = $table if ( @_ > 2 );
-    $self->{ _relationship2table }->{ $name };
-}
-
 
 sub setup_dbictic {
     my ( $self, $args ) = @_;
@@ -64,28 +58,35 @@ sub setup_dbictic {
 
 
 sub _set_join {
-    my ( $self, $name, $table, $left ) = @_;
+    my ( $self, $name, $table, $left, $table2name ) = @_; # join_name, table_name, is_left_join, table2join
     my $rel_info = $self->skinny->schema->relationship_info;
-    my $rels = $rel_info->{ $table } || {};
-    my $next_join;
+    my $rels     = $rel_info->{ $table } || {};
+
+    my $nested_join;
 
     if ( ref $name eq 'HASH' ) {
         # Don't use 'each'. 'each' does not reset key index iteration.
-        ( $name, $next_join ) = map { $_ => $name->{ $_ } } ( keys %$name )[0];
+        ( $name, $nested_join ) = map { $_ => $name->{ $_ } } ( keys %$name )[0];
     }
 
-    my $rel = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
+    my $rel  = $rels->{ $name } or Carp::croak("No such a join name '$name'.");
+    my $cond = $rel->{ condition };
+
+    $table2name->{ $rel->{ table } } = $name;
+
+    # replace table name to joinname
+    $cond =~ s{(\w+)(?=\.\w+)}{ exists $table2name->{ $1 } ? $table2name->{ $1 } : $1 }eg;
+
     my $val = {
-        condition => $rel->{ condition },
+        condition => $cond, #$rel->{ condition },
         type      => $left || $rel->{ type },
-        table     => $rel->{ table },
+        table     => $rel->{ table } . ' AS ' . $name,
     };
     $self->add_join( $rel->{ base_table } => $val );
-    $self->relationship2table( $name => $rel->{ table } );
 
-    if ( $next_join ) {
+    if ( $nested_join ) {
         my $left = ( $left or $rel->{ type} eq 'left' ) ? 'left' : ''; # 強制的にleft joinにするため
-        $self->_set_join( $next_join, $rel->{ table }, $left );
+        $self->_set_join( $nested_join, $rel->{ table }, $left, $table2name );
     }
 
 }
@@ -104,7 +105,7 @@ sub _make_join {
     local $Carp::CarpLevel = 1;
 
     for my $name ( @{ $attr->{ join } } ) {
-        $self->_set_join( $name, $self->table );
+        $self->_set_join( $name, $self->table, '', {} ); # join_name, table_name, is_left_join, table2join
     }
 
     $self;
@@ -152,9 +153,6 @@ sub _make_select {
 
     for my $i ( 0 .. $#{ $attr->{ 'select' } } ) {
         my $col = $attr->{ 'select' }->[ $i ];
-
-        $col =~ s{^(\w+)}{ $self->relationship2table( $1 ) || $1; }e;
-
         my $as  = $attr->{ 'as' }->[ $i ];
         $self->add_select( $col => $as );
     }
@@ -174,15 +172,20 @@ sub _make_group_and_order {
 
     my $having = $attr->{ having };
 
-    if ( $attr->{ use_sql_abstract } ) {
+    return $self unless $having;
+
+    if ( not ref( $having ) ) {
+        push @{ $self->{having} }, "($having)";
+    }
+    elsif ( $attr->{ use_sql_abstract } ) {
         $self->having_used_by_sql_abstract( $having );
     }
-    elsif ( $having and ref( $having ) eq 'HASH' ) {
+    elsif ( ref( $having ) eq 'HASH' ) {
         for my $k ( keys %$having ) {
             $self->add_having( $k => $having->{ $k } );
         }
     }
-    elsif ( $having and ref( $having ) eq 'ARRAY' ) {
+    elsif ( ref( $having ) eq 'ARRAY' ) {
         $self->add_having( @$having );
     }
 
@@ -228,7 +231,7 @@ sub _pager {
             my $str = $_[0];
             my $column =  sprintf( 'COUNT(DISTINCT(%s))', join( ',', @{ $attr->{ group_by } } ) );
             $str =~ s{^\s*SELECT\s+(?:.+?)\s+FROM}{SELECT $column FROM}i;
-            $str =~ s{GROUP\s+BY\s+(?:[.\w]+,?\s*){1,}}{}i;
+            $str =~ s{GROUP\s+BY\s+.+}{}si;
             return ( $str, $column );
         };
     }
@@ -272,8 +275,6 @@ DBIx::Skinny::SQL::DBICTic
 =head1 SYNOPSIS
 
 =head1 METHODS
-
-=head2 relationship2table
 
 =head2 setup_dbictic
 

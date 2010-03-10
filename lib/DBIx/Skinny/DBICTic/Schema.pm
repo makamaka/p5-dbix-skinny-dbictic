@@ -12,7 +12,7 @@ sub import {
     my $caller = caller;
 
     my @functions = qw(
-        relationship_info add_relation relationship has_a has_many belongs_to might_have  table condition
+        relationship_info relationship has_one has_many belongs_to might_have  table condition
     );
 
     no strict 'refs';

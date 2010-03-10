@@ -1,28 +1,25 @@
-package Mock::SQLite;
+package Mock::MySQL;
 
 use DBIx::Skinny::Profiler::ProfileLogger;
 use DBIx::Skinny setup => +{
-#    dsn => 'dbi:SQLite:',
-    dsn => 'dbi:SQLite:test.db',
-    username => '',
-    password => '',
     profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
 };
 
 use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
 
+
 sub setup_test_db {
     my $self = shift;
 
     for my $table ( qw( users user_status user_book books authors ) ) {
-        $self->do(qq{
+        eval { $self->do(qq{
             DROP TABLE IF EXISTS $table
-        });
+        }) };
     }
 
     $self->do(q{
         CREATE TABLE users (
-            id      integer,
+            id      integer auto_increment,
             name    text,
             primary key( id )
         )
@@ -38,7 +35,7 @@ sub setup_test_db {
 
     $self->do(q{
         CREATE TABLE user_book (
-            id      integer,
+            id      integer auto_increment,
             user_id integer,
             book_id integer,
             number  integer default 1,
@@ -48,7 +45,7 @@ sub setup_test_db {
 
     $self->do(q{
         CREATE TABLE books (
-            id          integer,
+            id          integer auto_increment,
             title       text,
             author_id   integer,
             primary key( id )
@@ -57,12 +54,11 @@ sub setup_test_db {
 
     $self->do(q{
         CREATE TABLE authors (
-            id          integer,
+            id          integer auto_increment,
             name        text,
             primary key( id )
         )
     });
-
 
     my $user_a = $self->insert( 'users', { name => 'a' } );
     my $user_b = $self->insert( 'users', { name => 'b' } );
@@ -102,12 +98,10 @@ sub setup_test_db {
     $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_a1->id } );
     $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_a2->id } );
     $self->insert( 'user_book', { user_id => $user_c->id, book_id => $book_c1->id } );
-
 }
 
-sub creanup_test_db {
+sub cleanup_test_db {
 }
-
 
 1;
 

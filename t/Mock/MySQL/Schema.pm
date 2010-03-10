@@ -1,4 +1,4 @@
-package Mock::SQLite::Schema;
+package Mock::MySQL::Schema;
 use utf8;
 use DBIx::Skinny::Schema;
 use DBIx::Skinny::DBICTic::Schema;
