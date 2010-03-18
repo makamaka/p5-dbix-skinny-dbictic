@@ -8,10 +8,11 @@ requires 'UNIVERSAL::require';
 author_tests('xt');
 
 build_requires 'Test::More';
+repository 'http://github.com/makamaka/p5-dbix-skinny-dbictic';
 
 use_test_base;
 auto_include;
-auto_set_repository;
+
 WriteAll;
 
 1;
