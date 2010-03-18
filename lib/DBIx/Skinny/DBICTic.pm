@@ -28,14 +28,14 @@ DBIx::Skinny::DBICTic - dbic-like interface
             id name
         /;
         
-        # Relationship
+        # built-in relationship
         has_many 'profiles'
                     => 'user_profile' => 'user.id = user_profile.user_id';
         might_have 'status'
                     => 'user_status'  => 'user.id = user_status.user_id';
         
-        # 汎用
-        relationship 'hoge'
+        # 
+        relationship 'a_relation'
                     => 'user_status' => {
                         condition => 'user.id user_status.user_id',
                         type => 'inner',
@@ -96,128 +96,218 @@ DBIx::Skinny::DBICTic - dbic-like interface
     
     my $pager = $itr->pager;
 
-=head1 VERSION
-
-  0.01
-
 =head1 DESCRIPTION
 
-DBIx::Skinnyのresultsetみたいなインターフェースを提供する。
+DBIx::Class-like features for DBIx::Skinny
 
 =head1 SCHEMA FEATURE
+
+In your schema class, you can use below functions.
 
 =head2 relationship
 
   relationship $join_name, { table => $table, condition => $cond, type => $type };
 
-C<join>に指定する名前、ハッシュを引数に取る。
-ハッシュはC<add_join>に渡す値C<table>, C<condition>, C<type>を含む。
+C<$join_name> is used by C<resultset_dbictic>'s  join attribute.
+C<$table> is a joining table name.
+C<$cond> is a condition and $type is a join type.
+See L<DBIx::Skinny::Resultset>.
+
+for example:
+
+    install_table 'some_table' => schema {
+        pk 'id';
+        columns qw/id name /;
+        relationship 'a_relation'
+                    => 'other_table' => {
+                        condition => 'some_table.id = other_table.id',
+                        type => 'inner',
+                    };
+    };
+
 
 =head2 has_one
 
-  has_one $join_name, $join_table, $condtion;
+  has_one $join_name, $table, $condtion;
 
-少しだけ楽をするためのもの。
+A wrapper of C<relationship>.
+C<$join_name> is used by C<resultset_dbictic>'s  join attribute.
+C<$table> is a joining table name.
+C<$cond> is a condition.
+
+for example:
+
+    install_table 'some_table' => schema {
+        pk 'id';
+        columns qw/id name /;
+        has_one 'has_one_relation' => 'other_table' => 'some_table.id = other_table.id';
+    };
+
 
 =head2 might_have
 
-  might_have $join_name, $join_table, $condtion;
+  might_have $join_name, $table, $condtion;
 
-少しだけ楽をするためのもの。
+A wrapper of C<relationship>.
+C<$join_name> is used by C<resultset_dbictic>'s  join attribute.
+C<$table> is a joining table name.
+C<$cond> is a condition.
+
+for example:
+
+    install_table 'some_table' => schema {
+        pk 'id';
+        columns qw/id name /;
+        might_have 'might_have_relation' => 'other_table' => 'some_table.id = other_table.id';
+    };
 
 =head2 has_many
 
-  has_many $join_name, $join_table, $condtion;
+  has_many $join_name, $table, $condtion;
 
-少しだけ楽をするためのもの。
+A wrapper of C<relationship>.
+C<$join_name> is used by C<resultset_dbictic>'s  join attribute.
+C<$table> is a joining table name.
+C<$cond> is a condition.
+
+for example:
+
+    install_table 'some_table' => schema {
+        pk 'id';
+        columns qw/id name /;
+        has_many 'has_many_relation' => 'other_table' => 'some_table.id = other_table.id';
+    };
 
 =head2 belongs_to
 
-  belongs_to $join_name, $join_table, $condtion;
+  belongs_to $join_name, $table, $condtion;
 
-少しだけ楽をするためのもの。
+A wrapper of C<relationship>.
+C<$join_name> is used by C<resultset_dbictic>'s  join attribute.
+C<$table> is a joining table name.
+C<$cond> is a condition.
 
-=head1 METHOD
+for example:
+
+    install_table 'some_table' => schema {
+        pk 'id';
+        columns qw/id name /;
+        has_one 'belongs_to_relation' => 'other_table' => 'some_table.id = other_table.id';
+    };
+
+
+=head1 SKINNY METHOD
+
+In your model class, you can call C<DBICTic> as mixin module.
+
+    package Your::Model;
+    use DBIx::Skinny;
+    use DBIx::Skinny::Mixin modules => [ qw(DBICTic) ];
 
 =head2 resultset_dbictic
 
   $rs = $skinny->resultset_dbictic( $table, $where, $attr );
 
-L<DBIx::Class::Resultset>っぽい値を渡せる。$attrに使えるキーはL</RESULTSET FEATURE>を参照。
-L<DBIx::Skiny::SQL>を継承したオブジェクトL<DBIx::Skiny::SQL::DBICTic>を返す。
+L<DBIx::Class::Resultset>-like interface.
+C<$table> is a table you need. C<$where> is a condition.
+If you set C<use_sql_abstract>, the C<$where> is applied to L<SQL::Abstract>.
+C<$attr> is attributes.
+See L</RESULTSET ATTRIBUTES> for available attributes.
 
-C<page>とC<rows>を指定した場合、c<retrieve>が返すイテレータのpagerメソッドで
-L<Data::Page>オブジェクトが返る。
+It returns L<DBIx::Skiny::SQL::DBICTic> object which inherits L<DBIx::Skiny::SQL>.
+
+If C<page> and C<rows> are specified, an iterator returned by C<$rs> has
+C<pager> method. it returns L<Data::Page> object.
+
+  $rs  = $skinny->resultset_dbictic( $table, {}, { page => 2, rows => 10 } );
+  $itr = $rs->retrieve.
+  $pager = $itr->pager; # Data::Page object
 
 
-=head1 RESULTSET FEATURE
+=head1 RESULTSET ATTRIBUTES
 
 =head2 join
 
   join => $listref
 
-schema内でrelationshipで設定した名前を指定する。
+Names specified by relationship (or its wrapper) in your schema class.
+
+It can accept nested join relations.
+
+  'join' => [ { 'book' => 'author' } ]
 
 =head2 select
 
   select => $listref
 
-selectしたいカラムを指定する。
+Column names want to select.
+
+  'select' => [ 'user_id', 'user_name' ],
 
 =head2 as
 
   as => $listref
 
-selectで指定したカラムのエイリアスを設定する。
+Alias names of columns specified by C<select>.
+
+  'as' => [ 'id', 'name' ],
 
 =head2 +select
 
   +select => $listref
 
-デフォルトで設定されてるカラムに追加する。
+Adding column names.
+
+  '+select' => [ 'author.name' ],
 
 =head2 +as
 
   +as => $listref
 
-+selectで指定したカラムのエイリアスを設定する。
+Alias names of columns specified by C<+select>.
+
+  '+as' => [ 'author_name' ],
 
 =head2 order_by
 
   order_by => $scalar
 
-order by。
+order by clause.
+
+  'order_by' => 'id DESC'
 
 =head2 limit
 
-  limit => $scalar
+  limit => $number
 
-limit。
+limit number.
 
 =head2 page
 
-  page => $scalar
+  page => $number
 
-rowsと一緒に使ってページを指定する。
+A page number. it must be used with C<rows> attributes.
 
 =head2 rows
 
-  rows => $scalar
+  rows => $number
 
-1ページに載せる行数。
+A number in one page.
 
 =head2 group_by
 
   group_by => $listref
 
-group by。
+group by clause.
+
+  group_by => [ 'id' ],
 
 =head2 having
 
   having => $hashref
   having => $arrayref
 
-havingの指定。
+having clause.
 
 =head2 count_subref
 
@@ -226,8 +316,13 @@ havingの指定。
       return ( $str, $column );
   }
 
-page指定したときのcount用ステートメンスとカラムを返すサブルーチンリファレンス。引数にSQL文をとる。
-デフォルトで
+A subroutine reference which returns a SQL statement and a column when C<page> and C<rows>
+attributes is set.
+
+This subroutine takes a SQL statement (returned by as_sql) and must return
+a SQL statement for count and its count column.
+
+Default by:
 
     sub {
         my $str = $_[0];
@@ -235,7 +330,7 @@ page指定したときのcount用ステートメンスとカラムを返すサ�
         return ( $str, 'COUNT(*)' );
     };
 
-となる。group_byを使用している場合は
+If using group_by attribute:
 
     sub {
         my $str = $_[0];
@@ -245,12 +340,21 @@ page指定したときのcount用ステートメンスとカラムを返すサ�
         return ( $str, $column );
     };
 
-になってる。
+For example;
+
+    'count_subref' => sub {
+        my $sql = $_[0];
+        sprintf( 'SELECT count(*) AS count_num FROM ( %s ) AS subquery', $sql ), 'count_num';
+    }
+
+This counter subroutine will be called when the resultset object use C<retrieve> method.
 
 
 =head2 use_sql_abstract
 
-C<$where>とC<having>の値に対してL<SQL::Abstract>が適用される。
+  use_sql_abstract => $bool
+
+If set ture, C<$where> and C<having> are applied to L<SQL::Abstract>.
 
 =head1 SEE ALSO
 
