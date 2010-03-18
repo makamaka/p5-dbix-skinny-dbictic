@@ -17,6 +17,7 @@ use warnings;
 use Data::Page;
 use SQL::Abstract;
 use DBIx::Skinny::Accessor;
+use Carp;
 
 use Data::Dumper;
 
