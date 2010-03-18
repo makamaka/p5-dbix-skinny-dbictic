@@ -3,8 +3,6 @@ package DBIx::Skinny::DBICTic::Schema;
 use strict;
 use warnings;
 
-use Data::Dumper;
-
 our $VERSION = '0.01';
 
 
@@ -32,15 +30,6 @@ sub relationship ($$;$) {
 
     my $base_table = $class->schema_info->{ _installing_table };
 
-# いらないか
-#    unless ( $base_table =~ /[\s.]/ ) { # aliasとしてmeをつける
-#        $base_table .= ' AS me';
-#    }
-#    my $join_table = $args->{ table };
-#    unless ( $join_table =~ /[\s.]/ ) { # テーブル名のみならaliasとしてrelationship nameをつける
-#        $join_table .= ' AS ' . $name;
-#    }
-
     $class->relationship_info->{ $base_table }->{ $name } = {
         base_table   => $base_table,
         %$args,
@@ -49,7 +38,7 @@ sub relationship ($$;$) {
 
 
 #
-# builtin
+# built-in
 #
 
 sub has_one ($$$) {
