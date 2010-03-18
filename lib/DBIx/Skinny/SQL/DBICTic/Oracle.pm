@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use base qw( DBIx::Skinny::SQL::DBICTic::OverwriteMethods DBIx::Skinny::SQL::Oracle DBIx::Skinny::SQL::DBICTic );
 
+our $VERSION = '0.01';
 
 1;
 __END__

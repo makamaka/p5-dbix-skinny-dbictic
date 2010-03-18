@@ -3,6 +3,8 @@ package DBIx::Skinny::SQL::DBICTic::OverwriteMethods;
 use strict;
 use warnings;
 
+our $VERSION = '0.01';
+
 # This module overwrites DBIx::Skinny::SQL methods.
 # Don't inherit DBIx::Skinny::SQL.
 #
