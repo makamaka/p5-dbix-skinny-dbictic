@@ -155,7 +155,7 @@ subtest 'For mysql: having, group_by, +select' => sub {
 
 
 subtest 'For mysql: having only' => sub {
-    my ($dsn, $username, $password) = @ENV{map { "SKINNY_PG_${_}" } qw/DSN USER PASS/};
+    my ($dsn, $username, $password) = @ENV{map { "SKINNY_MYSQL_${_}" } qw/DSN USER PASS/};
 
     plan skip_all => 'Set $ENV{SKINNY_MYSQL_DSN}, _USER and _PASS to run this test' unless ($dsn && $username);
 
