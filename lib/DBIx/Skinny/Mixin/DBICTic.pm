@@ -3,7 +3,7 @@ package DBIx::Skinny::Mixin::DBICTic;
 use strict;
 use warnings;
 use UNIVERSAL::require;
-
+use Carp ();
 
 our $VERSION = '0.01';
 
@@ -22,7 +22,7 @@ sub resultset_dbictic {
 
     if ( $self->dbd =~ m{DBD::(\w+)} ) {
         $pkg .= '::' . $1;
-        $pkg->require;
+        $pkg->require or Carp::croak( $@ );
     }
 
     $args->{ skinny }        = $self;

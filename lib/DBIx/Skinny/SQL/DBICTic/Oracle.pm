@@ -2,7 +2,8 @@ package DBIx::Skinny::SQL::DBICTic::Oracle;
 
 use strict;
 use warnings;
-use base qw( DBIx::Skinny::SQL::DBICTic::OverwriteMethods DBIx::Skinny::SQL::Oracle DBIx::Skinny::SQL::DBICTic );
+use DBIx::Skinny::SQL::DBICTic 'DBIx::Skinny::SQL::Oracle';
+#use base qw( DBIx::Skinny::SQL::DBICTic::OverwriteMethods DBIx::Skinny::SQL::Oracle DBIx::Skinny::SQL::DBICTic );
 
 our $VERSION = '0.01';
 

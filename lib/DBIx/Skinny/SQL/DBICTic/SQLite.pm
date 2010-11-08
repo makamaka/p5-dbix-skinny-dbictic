@@ -2,10 +2,18 @@ package DBIx::Skinny::SQL::DBICTic::SQLite;
 
 use strict;
 use warnings;
-use base qw( DBIx::Skinny::SQL::DBICTic::OverwriteMethods DBIx::Skinny::SQL DBIx::Skinny::SQL::DBICTic );
+
+#use DBIx::Skinny::SQL::DBICTic 'DBIx::Skinny::SQL::Mock';
+use DBIx::Skinny::SQL::DBICTic;
+
+#use base qw( DBIx::Skinny::SQL::DBICTic::OverwriteMethods DBIx::Skinny::SQL DBIx::Skinny::SQL::DBICTic );
 
 our $VERSION = '0.01';
 
+#use B::Deparse;
+#my $deparse = B::Deparse->new("-p", "-sC");
+#print $deparse->coderef2text( __PACKAGE__->can('retrieve')  ), "\n";
+#print $deparse->coderef2text( __PACKAGE__->can('as_sql')  ), "\n";
 
 1;
 __END__

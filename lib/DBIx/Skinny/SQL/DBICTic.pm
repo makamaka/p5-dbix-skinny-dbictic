@@ -17,6 +17,7 @@ use warnings;
 use Data::Page;
 use SQL::Abstract;
 use DBIx::Skinny::Accessor;
+use DBIx::Skinny::SQL::DBICTic::OverwriteMethods;
 use Carp;
 
 use Data::Dumper;
@@ -34,10 +35,30 @@ my $DefaultCountSubref = sub {
     return ( $str, 'COUNT(*)' );
 };
 
+
+sub import {
+    my $pkg       = shift;
+    my $sql_class = shift || 'DBIx::Skinny::SQL';
+    my $caller    = caller;
+
+    ( my $path = $sql_class . '.pm' ) =~ s{::}{/}g;
+
+    eval { require $path };
+    Carp::croak $@ if $@;
+
+    eval qq{
+        package $caller;
+        push \@$caller\::ISA, qw(
+            DBIx::Skinny::SQL::DBICTic::OverwriteMethods $sql_class $pkg
+        );
+    };
+    Carp::croak $@ if $@;
+}
+
+
 #
 # Public API
 #
-
 
 sub setup_dbictic {
     my ( $self, $args ) = @_;
