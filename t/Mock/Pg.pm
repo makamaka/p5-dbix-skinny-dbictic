@@ -1,7 +1,7 @@
 package Mock::Pg;
 
 #use DBIx::Skinny::Profiler::ProfileLogger;
-use DBIx::Skinny setup => +{
+use DBIx::Skinny connect_info => +{
 #    profiler => DBIx::Skinny::Profiler::ProfileLogger->new,
 };
 

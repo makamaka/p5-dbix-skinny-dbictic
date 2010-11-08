@@ -1,7 +1,7 @@
 package Mock::SQLite;
 
 #use DBIx::Skinny::Profiler::ProfileLogger;
-use DBIx::Skinny setup => +{
+use DBIx::Skinny connect_info => +{
     dsn => 'dbi:SQLite:',
     username => '',
     password => '',
